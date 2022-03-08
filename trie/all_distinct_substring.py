@@ -1,0 +1,149 @@
+
+
+class Node:
+    def __init__(self):
+        self.links = {}
+        self.cntEndWith = 0
+        self.cntPrefix = 0
+        self.flag = False
+    
+    def containsKey(self,char):
+        return self.links.get(ord(char) - ord('a')) != None
+    
+    def get(self,char):
+        return self.links.get(ord(char)-ord('a'))
+    
+    def put(self,char):
+        self.links[ord(char)-ord('a')] = Node()
+    
+    def increaseEnd(self):
+        self.cntEndWith+=1
+    def increasePrefix(self):
+        self.cntPrefix+=1
+
+    def deleteEnd(self):
+        self.cntEndWith-=1
+    
+    def reducePrefix(self):
+        self.cntPrefix-=1
+    
+    def getEnd(self):
+        return self.cntEndWith
+    
+    def getPrefix(self):
+        return self.cntPrefix
+
+    def isEnd(self):
+        return self.flag
+class Trie:
+    def __init__(self):
+        self.root=Node()
+
+    def insert(self,word):
+        node = self.root
+        for i in range(len(word)):
+            if not node.containsKey(word[i]):
+                node.put(word[i])
+            node=node.get(word[i])
+            node.increasePrefix()
+        node.increaseEnd()
+        node.flag = True
+    
+    
+    def getMax(self,num):
+        max_ = 0
+        node = self.root
+        for i in range(4,-1,-1):
+            bit = num>>i & 1
+            if node.containsKey(1-bit):
+                max_ = max_ | (1<<i)
+                node = node.get(1-bit)
+            else:
+                node=node.get(bit)
+        
+        return max_
+
+    def countWordsEqualTo(self,word):
+        node = self.root
+        for i in range(len(word)):
+            if not node.containsKey(word[i]):
+                return 0
+            else:
+                node = node.get(word[i])
+        
+        return node.getEnd()
+    
+    def erase(self,word):
+        node = self.root
+        for i in range(len(word)):
+            if node.containsKey(word[i]):
+                node=node.get(word[i])
+                node.reducePrefix()
+            else:
+                return
+        node.deleteEnd()
+    
+    def countWordsStartingWith(self,word):
+        node=self.root
+        for i in range(len(word)):
+            if node.containsKey(word[i]):
+                node=node.get(word[i])
+            else:
+                return 0
+
+        return node.getPrefix()
+
+    def checkIfPrefixExist(self,word):
+        node = self.root
+        flag = True
+        for i in range(len(word)):
+            if not node.containsKey(word[i]):
+                return False
+            else:
+                node=node.get(word[i])
+                flag = node.isEnd()
+            if not flag:
+                return False
+        return flag
+
+    def countDistinctSubstring(self,word):
+        count = 0 
+        for i in range(len(word)):
+            node = self.root
+            for j in range(i,len(word)):
+                if not node.containsKey(word[j]):
+                    node.put(word[j])
+                    count+=1
+                node = node.get(word[j])
+        
+        return count+1
+
+
+
+
+
+
+
+
+
+T = Trie()
+
+
+
+print(T.countDistinctSubstring('abab'))
+
+
+T.insert("apple")
+T.insert("apple")
+T.insert("apps")
+T.insert("apps")
+word1 = "apps"
+print(T.countWordsEqualTo(word1))
+word2 = "abc"
+print(T.countWordsEqualTo(word2))
+word3 = "ap"
+print(T.countWordsStartingWith(word3))
+word4 = "appl"
+print(T.countWordsStartingWith(word4))
+T.erase(word1)
+print(T.countWordsEqualTo(word1))
